@@ -13,7 +13,6 @@ def desenhar_retangulo(tela, largura=100, altura=100, pos_x=0, pos_y=0):
     pygame.draw.rect(tela, VERMELHO, [pos_x, pos_y, largura // 4, altura // 4])
 
 
-
 def start_game():
     try:
 
