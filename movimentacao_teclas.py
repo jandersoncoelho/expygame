@@ -52,7 +52,7 @@ def start_game():
             #         elif event.key == K_s:
             #             y = y + 20
 
-            # Movimenta enquanto estiver com a tecla pressionada
+            # Movimenta enquanto estiver com a tecla pressionada\
             if pygame.key.get_pressed()[K_a]:
                 x = x - 20
             elif pygame.key.get_pressed()[K_d]:
@@ -62,7 +62,7 @@ def start_game():
             elif pygame.key.get_pressed()[K_s]:
                 y = y + 20
 
-            # desenhando o carrinho
+            # desenhando o retângulo
             desenhar_retangulo(tela, largura, altura, x, y)
 
             # Atualize a tela
