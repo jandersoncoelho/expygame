@@ -37,11 +37,20 @@ def start_game():
         pygame.display.set_caption('Movimentação')
         relogio = pygame.time.Clock()
 
+        # Inicializando as variáveis que vão controlar o placar
+        pontos = 0
+        fonte = pygame.font.SysFont('arial', 40, True, True)
+        posicao_placar = (590, 10)
+
         # Loop principal do jogo
         while True:
             relogio.tick(10)
 
             # Limpe a tela
+
+            # Inserindo mensagem de pontuação
+            mensagem = f'Pontos: {pontos}'
+            texto_fomatado = fonte.render(mensagem, True, cores['BRANCO'])
             tela.fill(cores['PRETO'])
             for event in pygame.event.get():
                 if event.type == QUIT:
@@ -51,21 +60,34 @@ def start_game():
             if pygame.key.get_pressed()[K_a] or pygame.key.get_pressed()[K_LEFT]:
                 x_vermelho -= 20
             elif pygame.key.get_pressed()[K_d] or pygame.key.get_pressed()[K_RIGHT]:
-                x_vermelho = x_vermelho + 20
+                x_vermelho += 20
             elif pygame.key.get_pressed()[K_w] or pygame.key.get_pressed()[K_UP]:
-                y_vermelho = y_vermelho - 20
+                y_vermelho -= 20
             elif pygame.key.get_pressed()[K_s] or pygame.key.get_pressed()[K_DOWN]:
-                y_vermelho = y_vermelho + 20
+                y_vermelho += 20
+            print(f'O retângulo vemelho está nas coodenadas {x_vermelho}, {y_vermelho}')
 
+            # Verifica se o retângulo vermelho está saindo da tela
+            if x_vermelho < 0:
+                x_vermelho = 0
+            elif x_vermelho > largura - 100:  # 100 é a largura do retângulo
+                x_vermelho = largura - 100
+
+            if y_vermelho < 0:
+                y_vermelho = 0
+            elif y_vermelho > altura - 75:  # 100 é a altura do retângulo
+                y_vermelho = altura - 75
             # desenhando os retângulos
             ret_vermelho = desenhar_retangulo(tela, cores['VERMELHO'], largura, altura, x_vermelho, y_vermelho)
             ret_azul = desenhar_retangulo(tela, cores['AZUL'], largura, altura, x_azul, y_azul)
 
             if ret_vermelho.colliderect(ret_azul):
-                x_azul = randint(10, 600)
+                x_azul = randint(10, 590)
                 y_azul = randint(50, 430)
+                pontos += 1
 
             # Atualize a tela
+            tela.blit(texto_fomatado, posicao_placar)
             pygame.display.update()
 
     except Exception as e:
