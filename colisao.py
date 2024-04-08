@@ -21,6 +21,14 @@ def start_game():
         # Inicialização do Pygame
         pygame.init()
 
+        # Colocando música de fundo
+        pygame.mixer.music.set_volume(0.1)
+        pygame.mixer.music.load('sons/BoxCat Games - CPU Talk.mp3')
+        pygame.mixer.music.play(-1)
+
+        # Carrregando o som da colisão
+        barulho_colisao = pygame.mixer.Sound('sons/smw_coin.wav')
+
         # Definição das dimensões da janela
         largura = 800
         altura = 600
@@ -47,11 +55,11 @@ def start_game():
             relogio.tick(10)
 
             # Limpe a tela
+            tela.fill(cores['PRETO'])
 
             # Inserindo mensagem de pontuação
             mensagem = f'Pontos: {pontos}'
             texto_fomatado = fonte.render(mensagem, True, cores['BRANCO'])
-            tela.fill(cores['PRETO'])
             for event in pygame.event.get():
                 if event.type == QUIT:
                     exit()
@@ -65,7 +73,7 @@ def start_game():
                 y_vermelho -= 20
             elif pygame.key.get_pressed()[K_s] or pygame.key.get_pressed()[K_DOWN]:
                 y_vermelho += 20
-            print(f'O retângulo vemelho está nas coodenadas {x_vermelho}, {y_vermelho}')
+            # print(f'O retângulo vemelho está nas coodenadas {x_vermelho}, {y_vermelho}')
 
             # Verifica se o retângulo vermelho está saindo da tela
             if x_vermelho < 0:
@@ -81,10 +89,12 @@ def start_game():
             ret_vermelho = desenhar_retangulo(tela, cores['VERMELHO'], largura, altura, x_vermelho, y_vermelho)
             ret_azul = desenhar_retangulo(tela, cores['AZUL'], largura, altura, x_azul, y_azul)
 
+            # Evento de colisão no retângulo azul
             if ret_vermelho.colliderect(ret_azul):
                 x_azul = randint(10, 590)
                 y_azul = randint(50, 430)
                 pontos += 1
+                barulho_colisao.play()
 
             # Atualize a tela
             tela.blit(texto_fomatado, posicao_placar)
