@@ -16,7 +16,7 @@ cores = dict(PRETO=(0, 0, 0),
 pygame.init()
 
 # Colocando música de fundo
-pygame.mixer.music.set_volume(0.01)
+pygame.mixer.music.set_volume(0.1)
 pygame.mixer.music.load('sons/BoxCat Games - CPU Talk.mp3')
 pygame.mixer.music.play(-1)
 
@@ -31,11 +31,15 @@ tamanho_janela = (largura, altura)
 x_cobrinha = int(largura // 2.6)
 y_cobrinha = int(altura // 2.6)
 
+velocidade: int = 20
+x_controle = velocidade
+y_controle = 0
+
 x_maca = randint(10, 600)
 y_maca = randint(50, 430)
 
 # Inicializando as variáveis que vão controlar o placar
-pontos = 0
+pontos: int = 0
 fonte = pygame.font.SysFont('arial', 40, True, True)
 posicao_placar = (590, 10)
 
@@ -48,6 +52,10 @@ relogio = pygame.time.Clock()
 
 # Criando variável que controla o corpo da cobrinha
 lista_corpo_cobrinha = []
+comprimento_incial_cobrinha = 5
+
+# Inicicializando variável que trata do "Game Over" do jogo
+morreu = False
 
 
 def aumenta_corpo_cobrinha(corpo_cobrinha: list):
@@ -58,6 +66,20 @@ def aumenta_corpo_cobrinha(corpo_cobrinha: list):
     """
     for pos_x_y in corpo_cobrinha:
         pygame.draw.rect(tela, cores['VERDE'], [pos_x_y[0], pos_x_y[1], 20, 20])
+
+
+def reiniciar_jogo():
+    global pontos, comprimento_incial_cobrinha, x_cobrinha, y_cobrinha, lista_corpo_cobrinha, lista_cabeca_cobrinha, \
+        x_maca, y_maca, morreu
+    pontos = 0
+    comprimento_incial_cobrinha = 5
+    x_cobrinha = int(largura // 2.6)
+    y_cobrinha = int(altura // 2.6)
+    lista_corpo_cobrinha = []
+    lista_cabeca_cobrinha = [x_cobrinha, y_cobrinha]
+    x_maca = randint(10, 590)
+    y_maca = randint(50, 430)
+    morreu = False
 
 
 try:
@@ -78,26 +100,49 @@ try:
             if event.type == QUIT:
                 exit()
 
-        # Movimenta enquanto estiver com a tecla pressionada
-        if pygame.key.get_pressed()[K_a] or pygame.key.get_pressed()[K_LEFT]:
-            x_cobrinha -= 20
-        elif pygame.key.get_pressed()[K_d] or pygame.key.get_pressed()[K_RIGHT]:
-            x_cobrinha += 20
-        elif pygame.key.get_pressed()[K_w] or pygame.key.get_pressed()[K_UP]:
-            y_cobrinha -= 20
-        elif pygame.key.get_pressed()[K_s] or pygame.key.get_pressed()[K_DOWN]:
-            y_cobrinha += 20
-        # print(f'O retângulo vemelho está nas coodenadas {x_cobrinha}, {y_cobrinha}')
+            # Controlando os movimentos da cobrinha
+            if event.type == KEYDOWN:
+                if event.key == K_a:
+                    # Fazendo com que a cobrinha vá somente para a direita
+                    if x_controle == velocidade:
+                        pass
+                    else:
+                        x_controle = -velocidade
+                        y_controle = 0
+                elif event.key == K_d:
+                    # Fazendo com que a cobrinha vá somente para a esquerda
+                    if x_controle == -velocidade:
+                        pass
+                    else:
+                        x_controle = velocidade
+                        y_controle = 0
+                elif event.key == K_w:
+                    # Fazendo com que a cobrinha vá somente para cima
+                    if y_controle == velocidade:
+                        pass
+                    else:
+                        y_controle = -velocidade
+                        x_controle = 0
+                elif event.key == K_s:
+                    # Fazendo com que a cobrinha vá somente para baixo
+                    if y_controle == -velocidade:
+                        pass
+                    else:
+                        y_controle = velocidade
+                        x_controle = 0
 
-        # Verifica se a cobrinha está saindo da tela
+        x_cobrinha = x_cobrinha + x_controle
+        y_cobrinha = y_cobrinha + y_controle
+
+        # Verifica se a cobrinha está saindo da tela e faz ela aparecer do lado oposto
         if x_cobrinha < 0:
+            x_cobrinha = largura
+        elif x_cobrinha > largura:
             x_cobrinha = 0
-        elif x_cobrinha > largura - 20:  # 100 é a largura do retângulo
-            x_cobrinha = largura - 20
         if y_cobrinha < 0:
+            y_cobrinha = altura
+        elif y_cobrinha > altura:
             y_cobrinha = 0
-        elif y_cobrinha > altura - 20:  # 100 é a altura do retângulo
-            y_cobrinha = altura - 20
 
         # desenhando os retângulos
         cobrinha = pygame.draw.rect(tela, cores['VERDE'], [x_cobrinha, y_cobrinha, 20, 20])
@@ -109,10 +154,39 @@ try:
             y_maca = randint(50, 430)
             pontos += 1
             barulho_colisao.play()
+            comprimento_incial_cobrinha += 1
 
-        # trababalhando com o corpo da cobrinha
+        # trabalhando com o corpo da cobrinha
         lista_cabeca_cobrinha = [x_cobrinha, y_cobrinha]
         lista_corpo_cobrinha.append(lista_cabeca_cobrinha)
+
+        # Tratando o Game Over
+        if lista_corpo_cobrinha.count(lista_cabeca_cobrinha) > 1:
+            fonte2 = pygame.font.SysFont('arial', 20, True, True)
+            mensagem = 'Game over! Pressione a tecla R para jogar novamente'
+            texto_formatado = fonte2.render(mensagem, True, (0, 0, 0))
+            ret_texto = texto_formatado.get_rect()
+            print('MORREU!!')
+            morreu = True
+            while morreu:
+                tela.fill(cores["BRANCO"])
+                for event in pygame.event.get():
+                    if event.type == QUIT:
+                        exit()
+
+                    # Controlando os movimentos da cobrinha
+                    if event.type == KEYDOWN:
+                        if event.key == K_r:
+                            reiniciar_jogo()
+                    else:
+                        break
+                    ret_texto.center = (largura // 2, altura // 2)
+                    tela.blit(texto_formatado, ret_texto)
+                    pygame.display.update()
+        # Controlando o tamanho da cobrinha
+        if len(lista_corpo_cobrinha) > comprimento_incial_cobrinha:
+            del lista_corpo_cobrinha[0]
+
         aumenta_corpo_cobrinha(lista_corpo_cobrinha)
         print(lista_corpo_cobrinha)
 
